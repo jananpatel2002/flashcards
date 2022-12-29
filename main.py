@@ -1,6 +1,7 @@
 import random
 from tkinter import *
 import pandas
+import os
 
 random_number = None
 delayed_color_change = None
@@ -10,6 +11,8 @@ ARIAL_40_ITALIC = ("Ariel", 40, "italic")
 words_to_learn_list = []
 # --------------------------------------- METHODS ---------------------------------------
 try:
+    if(os.path.getsize("./data/words_to_learn.csv")) < 3:
+        raise FileNotFoundError
     data = pandas.read_csv("./data/words_to_learn.csv")
 except FileNotFoundError:
     data = pandas.read_csv("./data/french_words.csv")
@@ -40,18 +43,19 @@ def right_clicked():
         "French": data_dict[random_number]["French"],
         "English": data_dict[random_number]["English"]
     })
-
     df = pandas.DataFrame(data_dict)
-    df.to_csv("./data/words_to_learn.csv", index=False) # Makes a new csv file instantly after getting something right
-
-    generate_word()
-    print("right answer")
+    df.to_csv("./data/words_to_learn.csv", index=False)  # Makes a new csv file instantly after getting something right
+    if len(data_dict) == 0:
+        window.destroy()
+        print(os.path.getsize("./data/words_to_learn.csv"))
+    else:
+        generate_word()
 
 
 def wrong_clicked():
     window.after_cancel(delayed_color_change)
     generate_word()
-    print("wrong answer")
+
 
 
 # --------------------------------------- UI --------------------------------------------
@@ -81,8 +85,4 @@ right_button.grid(row=1, column=0, pady=20)
 wrong_button.grid(row=1, column=1, pady=20)
 
 generate_word()
-
 window.mainloop()
-
-
-
