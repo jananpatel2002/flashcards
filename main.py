@@ -2,15 +2,19 @@ import random
 from tkinter import *
 import pandas
 
+random_number = None
 delayed_color_change = None
 BACKGROUND_COLOR = "#B1DDC6"
 ARIAL_60_BOLD = ("Ariel", 60, "bold")
 ARIAL_40_ITALIC = ("Ariel", 40, "italic")
+words_to_learn_list = []
 # --------------------------------------- METHODS ---------------------------------------
-
-
-data = pandas.read_csv("./data/french_words.csv")
-data_dict = pandas.DataFrame.to_dict(data, orient="records")  # Turns the whole csv file into a nice dictionary
+try:
+    data = pandas.read_csv("./data/words_to_learn.csv")
+except FileNotFoundError:
+    data = pandas.read_csv("./data/french_words.csv")
+finally:
+    data_dict = pandas.DataFrame.to_dict(data, orient="records")  # Turns the whole csv file into a nice dictionary
 
 
 def change_background(text):
@@ -21,15 +25,25 @@ def change_background(text):
 
 def generate_word():
     global delayed_color_change
+    global random_number
     canvas.itemconfig(image, image=card_front)
     canvas.itemconfig(language, text="French", fill="black")
-    random_number = random.randint(0, len(data_dict))
+    random_number = random.randint(0, len(data_dict) - 1)
     canvas.itemconfig(word, text=data_dict[random_number]["French"], fill="black")
     delayed_color_change = window.after(3000, change_background, data_dict[random_number]["English"])
 
 
 def right_clicked():
-    window.after_cancel(delayed_color_change)
+    window.after_cancel(
+        delayed_color_change)  # Cancels the previous instance of the 3k millisecond timer incase user spams
+    data_dict.remove({
+        "French": data_dict[random_number]["French"],
+        "English": data_dict[random_number]["English"]
+    })
+
+    df = pandas.DataFrame(data_dict)
+    df.to_csv("./data/words_to_learn.csv", index=False) # Makes a new csv file instantly after getting something right
+
     generate_word()
     print("right answer")
 
@@ -43,6 +57,7 @@ def wrong_clicked():
 # --------------------------------------- UI --------------------------------------------
 
 window = Tk()
+window.title("Flash Cards for France")
 window.config(bg=BACKGROUND_COLOR)
 window.minsize(width=900, height=800)
 canvas = Canvas(width=850, height=600, bg=BACKGROUND_COLOR, highlightthickness=0)
@@ -68,3 +83,6 @@ wrong_button.grid(row=1, column=1, pady=20)
 generate_word()
 
 window.mainloop()
+
+
+
