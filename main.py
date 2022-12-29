@@ -8,7 +8,7 @@ delayed_color_change = None
 BACKGROUND_COLOR = "#B1DDC6"
 ARIAL_60_BOLD = ("Ariel", 60, "bold")
 ARIAL_40_ITALIC = ("Ariel", 40, "italic")
-words_to_learn_list = []
+
 # --------------------------------------- METHODS ---------------------------------------
 try:
     if(os.path.getsize("./data/words_to_learn.csv")) < 3:
